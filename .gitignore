@@ -1,0 +1,20 @@
+node_modules/
+dist/
+*.log
+.env
+.env.*
+
+# Captures de vérification et fichiers de compilation
+captures/
+*.tsbuildinfo
+# Ancien CV (remplacé par le nouveau, à venir)
+cv-ancien/
+
+# ── Contenu personnel : reste sur l'ordinateur, jamais publié sur GitHub ──
+# (le dépôt public contient le code et un contenu d'exemple : src/contenu-exemple/, public/exemple/)
+src/contenu/
+public/media/
+public/icones/
+public/cv/
+scripts/
+NOTES.md
