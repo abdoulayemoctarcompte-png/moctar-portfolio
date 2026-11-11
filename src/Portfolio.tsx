@@ -185,21 +185,24 @@ function Accueil() {
         <strong className="text-slate-900 dark:text-white">{profil.metier}</strong> — {profil.accroche} {profil.formation}.
       </motion.p>
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="mt-8 flex flex-wrap justify-center gap-3">
-        <a href="#projets" className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-violet-500 px-6 py-3 font-semibold text-white shadow-lg shadow-violet-500/25 transition hover:shadow-violet-500/40">
+      {/* Téléphone : les deux boutons l'un sous l'autre, même largeur, puis LinkedIn et GitHub centrés. Grand écran : tout sur une ligne. */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="mx-auto mt-8 flex max-w-xs flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
+        <a href="#projets" className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-violet-500 px-6 py-3 font-semibold text-white shadow-lg shadow-violet-500/25 transition hover:shadow-violet-500/40">
           Voir mes projets <ArrowRight className="size-4 transition group-hover:translate-x-1" />
         </a>
         {profil.cv.afficher && (
-          <a href={profil.cv.pdf} download={profil.cv.nomFichier} className={`inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold transition hover:border-cyan-500 ${verre}`}>
+          <a href={profil.cv.pdf} download={profil.cv.nomFichier} className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-semibold transition hover:border-cyan-500 ${verre}`}>
             <Download className="size-4" /> Télécharger le CV
           </a>
         )}
-        <a href={profil.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" className={`grid size-12 place-items-center rounded-full transition hover:text-cyan-500 ${verre}`}>
-          <IconeLinkedin />
-        </a>
-        <a href={profil.github} target="_blank" rel="noreferrer" aria-label="GitHub" className={`grid size-12 place-items-center rounded-full transition hover:text-cyan-500 ${verre}`}>
-          <IconeGithub />
-        </a>
+        <div className="flex justify-center gap-3">
+          <a href={profil.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" className={`grid size-12 place-items-center rounded-full transition hover:text-cyan-500 ${verre}`}>
+            <IconeLinkedin />
+          </a>
+          <a href={profil.github} target="_blank" rel="noreferrer" aria-label="GitHub" className={`grid size-12 place-items-center rounded-full transition hover:text-cyan-500 ${verre}`}>
+            <IconeGithub />
+          </a>
+        </div>
       </motion.div>
 
       <div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
