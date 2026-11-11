@@ -7,7 +7,8 @@ Ce dépôt contient **le code** et **un contenu d'exemple**. Mes textes, photos,
 ## Ce que fait le site
 
 - Accueil avec photo, accroche, terminal qui écrit des commandes et chiffres clés
-- Compétences classées par niveau (Maîtrise, Pratique, Notions), avec icônes
+- Compétences par domaine (un onglet par domaine), avec une bande d'icônes qui défile, classées par niveau (Maîtrise, Pratique, Notions)
+- Aperçu et téléchargement du CV (bouton à l'accueil et carte dans la partie contact)
 - Projets filtrables (scolaires / personnels), avec une galerie d'images et de vidéos pour chaque projet (flèches, clavier, glissement du doigt)
 - Formation sous forme de frise
 - Méthodes de travail (agile : Scrum et Kanban ; objectifs SMART)

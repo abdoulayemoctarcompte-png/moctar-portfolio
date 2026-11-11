@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { ArrowRight, Briefcase, Calendar, Cloud, Code2, Compass, Database, Download, Globe, GraduationCap, Mail, MapPin, Menu, Terminal as IconeTerminal, X } from "lucide-react";
+import { ArrowRight, Briefcase, Calendar, Cloud, Code2, Compass, Database, Download, FileText, Globe, GraduationCap, Mail, MapPin, Menu, Terminal as IconeTerminal, X } from "lucide-react";
 import type { Theme } from "./hooks/useTheme";
 import { commandes, formations, piliers, profil } from "@contenu/profil";
 import { agile, competences, smart, outils, savoirEtre } from "@contenu/competences";
@@ -236,6 +236,7 @@ const COULEURS_FAMILLE: Record<CouleurFamille, { titre: string; etiquette: strin
 };
 
 function Competences() {
+  const [domaine, setDomaine] = useState(0);
   return (
     <section id="competences" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-16 sm:px-6">
       <Titre numero="01" titre="Stack & compétences" />
@@ -257,43 +258,36 @@ function Competences() {
         ))}
       </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
-        {competences.map((g, i) => {
-          const Icone = ICONES[g.icone];
-          return (
-            <Apparition key={g.titre} delai={(i % 2) * 0.06} className={`p-5 sm:p-6 ${verre}`}>
-              <div className="flex items-center gap-3">
-                <span className="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 text-cyan-600 dark:text-cyan-300">
-                  <Icone className="size-5" />
-                </span>
-                <h3 className="text-lg font-bold">{g.titre}</h3>
-              </div>
-              {NIVEAUX.map((n) => {
-                const items = g.items.filter((c) => c.niveau === n.id);
-                if (!items.length) return null;
-                return (
-                  <div key={n.id} className="mt-5">
-                    <p className="flex items-center gap-2 font-mono text-[11px] tracking-wide text-slate-500 uppercase">
-                      <span className={`inline-block size-2.5 rounded-sm ${STYLE_NIVEAU[n.id].pastille}`} />
-                      {n.nom}
-                    </p>
-                    <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(74px,1fr))] gap-x-2 gap-y-4">
-                      {items.map((c) => (
-                        <li key={c.nom} className="group flex flex-col items-center gap-1.5 text-center" title={`${c.nom} — ${n.nom}`}>
-                          <span className={`grid size-14 place-items-center rounded-2xl bg-white shadow-sm transition duration-200 group-hover:-translate-y-1 group-hover:shadow-md ${STYLE_NIVEAU[n.id].case}`}>
-                            <img src={c.icone} alt="" loading="lazy" decoding="async" width={36} height={36} className="size-9 object-contain" />
-                          </span>
-                          <span className="text-[11px] leading-tight font-medium text-slate-700 dark:text-slate-300">{c.nom}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </Apparition>
-          );
-        })}
-      </div>
+      {/* Un onglet par domaine (Développement par défaut) et une seule bande qui défile, pause au survol ou au toucher. */}
+      <Apparition className="mt-4">
+        <div role="tablist" aria-label="Domaines de compétences" className={`grid grid-cols-2 gap-1 rounded-3xl p-1 sm:inline-flex sm:rounded-full ${verre}`}>
+          {competences.map((g, i) => {
+            const Icone = ICONES[g.icone];
+            const actif = domaine === i;
+            return (
+              <button
+                key={g.titre}
+                id={`onglet-competences-${i}`}
+                role="tab"
+                aria-selected={actif}
+                aria-controls="bande-competences"
+                onClick={() => setDomaine(i)}
+                className={`inline-flex items-center justify-center gap-1.5 rounded-full px-2 py-2 text-[13px] font-semibold transition sm:gap-2 sm:px-5 sm:text-sm ${
+                  actif ? "bg-gradient-to-r from-cyan-500 to-violet-500 text-white shadow-md shadow-violet-500/20" : "text-slate-600 hover:bg-slate-900/5 dark:text-slate-300 dark:hover:bg-white/10"
+                }`}
+              >
+                <Icone className="size-4 shrink-0" />
+                <span className="whitespace-nowrap">{g.titre}</span>
+                {/* Le nombre ne s'affiche que sur grand écran, pour que les noms tiennent sur téléphone. */}
+                <span className={`hidden font-mono text-xs sm:inline ${actif ? "text-white/80" : "text-slate-400"}`}>{g.items.length}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div id="bande-competences" role="tabpanel" aria-labelledby={`onglet-competences-${domaine}`} className={`mt-3 overflow-hidden py-2 ${verre}`}>
+          <BandeCompetences key={competences[domaine].titre} groupe={competences[domaine]} />
+        </div>
+      </Apparition>
 
       <div className="mt-6 grid gap-3 lg:grid-cols-[1fr_2fr]">
         <div className={`p-6 ${verre}`}>
@@ -325,6 +319,47 @@ function Competences() {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Le domaine choisi : ses icônes défilent en boucle, de la Maîtrise aux Notions. */
+function BandeCompetences({ groupe }: { groupe: GroupeCompetences }) {
+  const ordre = NIVEAUX.map((n) => n.id);
+  const items = [...groupe.items].sort((a, b) => ordre.indexOf(a.niveau) - ordre.indexOf(b.niveau));
+  const nomNiveau = (id: Niveau) => NIVEAUX.find((n) => n.id === id)?.nom ?? "";
+  // Chaque copie doit être plus large que l'écran : on répète la liste si le domaine a peu de compétences.
+  const tours = Math.max(1, Math.ceil(16 / items.length));
+  const repetes = Array.from({ length: tours }, () => items).flat();
+  const liste = (copie: number) => (
+    <ul key={copie} className="flex shrink-0 gap-3 pr-3">
+      {repetes.map((c, k) => (
+        <li key={`${c.nom}-${k}`} className={`flex w-[84px] flex-col items-center gap-1.5 text-center ${k >= items.length ? "repete" : ""}`} title={`${c.nom} — ${nomNiveau(c.niveau)}`}>
+          <span className={`grid size-14 place-items-center rounded-2xl bg-white shadow-sm ${STYLE_NIVEAU[c.niveau].case}`}>
+            <img src={c.icone} alt="" loading="lazy" decoding="async" width={36} height={36} className="size-9 object-contain" />
+          </span>
+          <span className="text-[11px] leading-tight font-medium text-slate-700 dark:text-slate-300">{c.nom}</span>
+        </li>
+      ))}
+    </ul>
+  );
+  return (
+    <div className="px-3 py-3 sm:px-4">
+      {/* Pour les lecteurs d'écran : la liste simple, avec le niveau de chaque compétence. */}
+      <ul className="sr-only">
+        {items.map((c) => (
+          <li key={c.nom}>
+            {c.nom} : {nomNiveau(c.niveau)}
+          </li>
+        ))}
+      </ul>
+      <div className="bande" aria-hidden="true">
+        {/* Deux copies identiques : quand la première est sortie à gauche, la seconde a pris sa place (boucle sans saut). */}
+        <div className="piste flex w-max py-1" style={{ ["--duree" as string]: `${repetes.length * 2.8}s` }}>
+          {liste(0)}
+          {liste(1)}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -571,6 +606,7 @@ function Contact() {
               <MapPin className="size-4" /> {profil.ville}
             </p>
           </div>
+          {profil.cv.afficher && <CarteCv />}
         </div>
         <FormulaireContact
           champ="rounded-xl border border-slate-900/10 bg-white/80 px-4 py-3 outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 dark:border-white/10 dark:bg-white/5"
@@ -581,6 +617,34 @@ function Contact() {
         © {new Date().getFullYear()} {profil.prenom} {profil.nom} · construit avec React, TypeScript et Tailwind
       </p>
     </section>
+  );
+}
+
+/** Aperçu du CV en bas de page : la miniature ouvre le PDF, le bouton le télécharge. */
+function CarteCv() {
+  return (
+    <div className="mt-8 flex items-center gap-5 rounded-2xl border border-slate-900/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5">
+      <a href={profil.cv.pdf} target="_blank" rel="noreferrer" aria-label="Ouvrir le CV en PDF" className="group shrink-0">
+        <img
+          src={profil.cv.image}
+          alt={`Aperçu du CV de ${profil.prenom} ${profil.nom}`}
+          loading="lazy"
+          className="w-24 rounded-md border border-slate-900/10 shadow-md transition group-hover:-translate-y-1 group-hover:shadow-lg sm:w-28 dark:border-white/10"
+        />
+      </a>
+      <div className="min-w-0">
+        <p className="font-semibold">Mon CV</p>
+        <p className="mt-1 text-sm text-slate-500">1 page, format PDF</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a href={profil.cv.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-slate-900/10 px-4 py-2 text-sm font-semibold transition hover:border-cyan-500 hover:text-cyan-500 dark:border-white/15">
+            <FileText className="size-4" /> Voir
+          </a>
+          <a href={profil.cv.pdf} download={profil.cv.nomFichier} className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-semibold text-white">
+            <Download className="size-4" /> Télécharger
+          </a>
+        </div>
+      </div>
+    </div>
   );
 }
 

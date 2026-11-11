@@ -55,10 +55,32 @@ body { overflow-x: hidden; }
   background: radial-gradient(560px circle at var(--x, -999px) var(--y, -999px), rgb(34 211 238 / 0.16), rgb(139 92 246 / 0.14) 45%, transparent 70%);
 }
 
+/* Bandes de compétences qui défilent de droite à gauche, en boucle. Pause au survol ou au toucher. */
+@keyframes defilement-bande {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.bande {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}
+.piste {
+  animation: defilement-bande var(--duree, 40s) linear infinite;
+  will-change: transform;
+}
+.bande:hover .piste,
+.bande:active .piste { animation-play-state: paused; }
+
 /* Barre de défilement discrète pour les miniatures de la galerie. */
 .defilement-fin { scrollbar-width: thin; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  /* Sans animation, les compétences s'affichent simplement sur plusieurs lignes. */
+  .bande { mask-image: none; }
+  .piste { animation: none !important; width: auto; }
+  .piste > ul { flex-wrap: wrap; row-gap: 1rem; }
+  .piste > ul + ul,
+  .piste .repete { display: none; }
 }
